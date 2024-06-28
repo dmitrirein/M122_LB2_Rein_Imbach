@@ -1,11 +1,16 @@
-import requests
+import request
+import os
+from dotenv import load_dotenv
 
-#API_Key = "6cba7b191454e2da0f71bd1a674b32db"
+load_dotenv()
+
+
+API_Key = os.getenv("api_key")
 
 #lat = 47.376888
 #lon = 8.541694
 
-URL = "https://api.openweathermap.org/data/2.5/forecast?lat=47.376888&lon=8.541694&appid=6cba7b191454e2da0f71bd1a674b32db"
+URL = "https://api.openweathermap.org/data/2.5/forecast?lat=47.376888&lon=8.541694&appid=" + API_Key
 
 response = requests.get(URL)
 
@@ -14,5 +19,8 @@ if response.status_code == 200:
 
 else:
     print ("Es gab leider einen Fehler!")
+     return None
+
+
 
 
