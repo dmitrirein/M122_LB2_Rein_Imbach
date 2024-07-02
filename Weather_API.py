@@ -1,4 +1,6 @@
 import requests
+from html_content import html_skript
+
 
 #API_Key = "6cba7b191454e2da0f71bd1a674b32db"
 
@@ -15,34 +17,34 @@ else:
     print ("Es gab leider einen Fehler!")
 
 
-temperaturen = [round(wetter_daten["list"][i]["main"]["temp_max"]-273.15, 1) for i in [0, 8, 16, 24, 32, 39]]
-
-daten = [i["dt_txt"].split(" ")[0] for i in wetter_daten["list"]]
-
+temperaturen = [round(elem["main"]["temp_max"] - 273.15, 1) for elem in wetter_daten["list"]]
+daten = [elem["dt_txt"].split(" ")[0] for elem in wetter_daten["list"]]
 daten = list(set(daten))
-
 daten.sort()
 
-# beinhaltet daten und die zugehorige maximale temperatur
+# Maximaltemperaturen pro Tag sammeln
 max_temp_pro_tag = {}
-
 for datum in daten:
-    # alle temeraturen vom tag
-    tag_temperaturen = []
-
-    # geht durh jeder element im wetter_daten und addiert alle temperaturen die zum tag gehoren
-    for element in wetter_daten["list"]:
-        if element["dt_txt"].split(" ")[0] == datum:
-            temperatur = round(element["main"]["temp_max"]-273.15, 1)
-            tag_temperaturen.append(temperatur)
-
-    # maximaler wert in tag_temperaturen
-    max_temp = max(tag_temperaturen)
-
-    max_temp_pro_tag.update({datum:max_temp})
+    tag_temperaturen = [round(elem["main"]["temp_max"] - 273.15, 1) for elem in wetter_daten["list"] if elem["dt_txt"].split(" ")[0] == datum]
+    max_temp_pro_tag[datum] = max(tag_temperaturen)
 
 
-print(max_temp_pro_tag)
+for datum, temp in max_temp_pro_tag.items():
+    html_skript += f"""
+        <tr>
+            <td>{datum}</td>
+            <td>{temp}</td>
+        </tr>
+    """
 
-# for datum in
-    
+html_skript += """
+    </table>
+</body>
+</html>
+"""
+
+# HTML-Datei speichern
+with open("Temperatur.html", "w") as file:
+    file.write(html_skript)
+
+print("HTML-Datei wurde erfolgreich erstellt: Temperatur.html")
