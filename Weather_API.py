@@ -1,5 +1,7 @@
 import requests
 from html_content import html_skript
+from collections import Counter
+from fpdf import FPDF
 
 
 #API_Key = "6cba7b191454e2da0f71bd1a674b32db"
@@ -44,7 +46,44 @@ html_skript += """
 """
 
 # HTML-Datei speichern
-with open("Temperatur.html", "w") as file:
+with open("Temperatur.html", "w", encoding="utf-8") as file:
     file.write(html_skript)
 
 print("HTML-Datei wurde erfolgreich erstellt: Temperatur.html")
+
+PDF_Infos = {}
+for datum in daten:
+    tag_info = {}
+
+    max_tag_temperaturen = [round(elem["main"]["temp_max"] - 273.15, 1) for elem in wetter_daten["list"] if elem["dt_txt"].split(" ")[0] == datum]
+    tag_info.update({"temp_max": max(max_tag_temperaturen)})
+
+    min_tag_temperaturen = [round(elem["main"]["temp_min"] - 273.15, 1) for elem in wetter_daten["list"] if elem["dt_txt"].split(" ")[0] == datum]
+    tag_info.update({"temp_min": min(min_tag_temperaturen)})
+
+    Wetter = [elem["weather"][0]["main"] for elem in wetter_daten["list"] if elem["dt_txt"].split(" ")[0] == datum]
+    Wetter = Counter(Wetter).most_common(1)[0][0]
+    tag_info.update({"weather": Wetter})
+
+    Wetter_Description = [elem["weather"][0]["description"] for elem in wetter_daten["list"] if elem["dt_txt"].split(" ")[0] == datum]
+    Wetter_Description = Counter(Wetter_Description).most_common(1)[0][0]
+    tag_info.update({"description": Wetter_Description})
+
+
+    PDF_Infos[datum] = tag_info
+
+
+
+
+def dict_to_pdf(data, file_name):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size = 12)
+    
+    for key, value in data.items():
+        pdf.cell(200, 10, txt = f"{key}: {value}", ln = True)
+    
+    pdf.output(file_name)
+
+
+dict_to_pdf(PDF_Infos, "Wetter.pdf")
